@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>US / Mexico Border Deaths, 2019</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.js"></script>
+<link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.css" rel="stylesheet" />
+<style>
+	body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; };
+    .mapboxgl-popup {
+      max-width: 450px;
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    }
+    li {
+      padding: 3px 0;
+    }
+    #legend {
+      font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      background: rgba(255,255,255,.5);
+      width: 350px; 
+      border: 1px solid rgba(0,0,0,0.05);
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      box-shadow: 0 0 4px 0 rgba(0,0,0,0.1);
+      color: rgba(0,0,0,0.5);
+    }
+    h4 {
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      margin: 0;
+      padding: 16px;
+    }
+    ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 16px;
+    }
+    ul span {
+      width: 10px;
+      height: 10px;
+      display: inline-block;
+      margin-right: 8px;
+      border-radius: 50%;
+    }
+    dd {
+      margin-left: 0;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    dl {
+      margin-bottom: 0;
+    }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id='legend'>
+  <h4>Border Deaths, 2019</h4>
+    <ul>Whatever you may think of immigration into the United States, we should all be able to agree that our fellow humans
+      should not be dying while they try to move to the United States, no matter their reason. 
+      <p>
+        This map tells a story of those who died in 2019 trying to cross the militarized border into the United States.
+      </p>
+      <p>
+        Zoom in and click on points to read more details on the stories of those who lost their lives trying to better them.
+      </p>
+      <p>
+        [coming soon] <a href="#">Click here to view story mode.</a>
+      </p>
+      <p>
+        Feedback? <a href="mailto:sfader4@gmail.com" target="blank">Email me.</a>
+      </p>
+    </ul>
+  </div>
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1Ijoic2FtZiIsImEiOiJjaWZ3bGhtdjgzMnN1dWdrcnEwZTVieG91In0.DkCY-91coDahKvpH7Z26dw';
+  var bounds = [
+    [-128.49609375, 22.024545601240337], // Southwest coordinates
+    [-84.375, 43.89789239125797] // Northeast coordinates
+  ];
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/samf/ck4bxhty407oi1cp500abeca6',
+        center: [-108.79, 34.8],
+        zoom: 4.21,
+        minZoom: 4,
+        hash: true,
+        maxBounds: bounds
+    });
+
+  // Create a popup for use later
+  var popup = new mapboxgl.Popup({
+    closeButton: true,
+    closeOnClick: true
+  });
+
+  // Make border sectors hoverable
+  map.on('click', 'us-border-sectors-fill', function(e){
+    map.getCanvas().style.cursor = 'pointer';
+    var coordinates = e.lngLat.wrap();
+    var sectorName = e.features[0].properties["SEC_NAME"];
+
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+
+    popup
+      .setLngLat(coordinates)
+      .setHTML("Border Sector: " + sectorName)
+      .addTo(map);
+    });
+
+  // Make death points clickable
+  map.on('click', 'deaths', function(e) {
+    var coordinates = e.features[0].geometry.coordinates.slice();
+    var dataProperties = e.features[0].properties
+    var causeOfDeath = dataProperties["Cause of Death"];
+    var reportedDate = dataProperties["Reported Date"];
+    var informationSource = dataProperties["Information Source"];
+    var urls = dataProperties["URL"];
+
+
+    // Ensure that if the map is zoomed out such that multiple
+    // copies of the feature are visible, the popup appears
+    // over the copy being pointed to.
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+
+    popup
+      .setLngLat(coordinates)
+      .setHTML("Cause of Death: " + causeOfDeath + "<br>"
+      + "Reported Date: " + reportedDate + "<br>"
+      + "Information Source: " + informationSource + "<br>"
+      + "Source URL(s): " + `<a href=${urls} target='blank'>${urls}</a>`)
+      .addTo(map);
+    });
+ 
+// Change the cursor to a pointer when the mouse is over the places layer.
+  map.on('mouseenter', 'places', function() {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+ 
+// Change it back to a pointer when it leaves.
+  map.on('mouseleave', 'places', function() {
+    map.getCanvas().style.cursor = '';
+  });
+</script>
+
+</body>
+</html>
