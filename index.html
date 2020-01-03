@@ -6,56 +6,11 @@
 <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
 <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.js"></script>
 <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.css" rel="stylesheet" />
-<style>
-	body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; };
-    .mapboxgl-popup {
-      max-width: 450px;
-      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    }
-    li {
-      padding: 3px 0;
-    }
-    #legend {
-      font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-      background: rgba(255,255,255,.5);
-      width: 350px; 
-      border: 1px solid rgba(0,0,0,0.05);
-      position: absolute;
-      right: 16px;
-      top: 16px;
-      box-shadow: 0 0 4px 0 rgba(0,0,0,0.1);
-      color: rgba(0,0,0,0.5);
-    }
-    h4 {
-      text-transform: uppercase;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      margin: 0;
-      padding: 16px;
-    }
-    ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 16px;
-    }
-    ul span {
-      width: 10px;
-      height: 10px;
-      display: inline-block;
-      margin-right: 8px;
-      border-radius: 50%;
-    }
-    dd {
-      margin-left: 0;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    dl {
-      margin-bottom: 0;
-    }
-</style>
+<link rel="stylesheet" type="text/css" href="style.css">
 </head>
+
 <body>
+<nav id="menu"></nav>
 <div id="map"></div>
 <div id='legend'>
   <h4>Border Deaths, 2019</h4>
@@ -68,7 +23,7 @@
         Zoom in and click on points to read more details on the stories of those who lost their lives trying to better them.
       </p>
       <p>
-        [coming soon] <a href="#">Click here to view story mode.</a>
+        <a href="/story.html">Click here to view story mode.</a>
       </p>
       <p>
         Feedback? <a href="mailto:sfader4@gmail.com" target="blank">Email me.</a>
@@ -81,16 +36,19 @@
     [-128.49609375, 22.024545601240337], // Southwest coordinates
     [-84.375, 43.89789239125797] // Northeast coordinates
   ];
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/samf/ck4bxhty407oi1cp500abeca6',
-        center: [-108.79, 34.8],
-        zoom: 4.21,
-        minZoom: 4,
-        hash: true,
-        maxBounds: bounds
-    });
 
+  var map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/samf/ck4bxhty407oi1cp500abeca6',
+      center: [-108.79, 34.8],
+      zoom: 4.21,
+      minZoom: 4,
+      hash: true,
+      maxBounds: bounds
+  });
+
+  var nav = new mapboxgl.NavigationControl();
+  map.addControl(nav, 'top-left');
   // Create a popup for use later
   var popup = new mapboxgl.Popup({
     closeButton: true,
@@ -148,6 +106,7 @@
   map.on('mouseleave', 'places', function() {
     map.getCanvas().style.cursor = '';
   });
+
 </script>
 
 </body>
