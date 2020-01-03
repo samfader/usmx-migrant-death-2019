@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>US / Mexico Border Deaths, 2019</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.js"></script>
+<link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.css" rel="stylesheet" />
+<script src="stories.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+
+<div id="map"></div>
+<div id ='main-menu'>
+  <a href="/index.html">Main map</a>
+</div>
+<div id='story-legend'>
+    <ul>
+      <p>
+        Use the <b>arrow keys</b> on your keyboard to read about specific stories, and continue to interact with the map as desired.
+      </p>
+      </div>
+    </ul>
+</div>
+<div id='story'><p><b>Content Warning:</b> Many of these stories contain violent descriptions.</p>
+
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1Ijoic2FtZiIsImEiOiJjaWZ3bGhtdjgzMnN1dWdrcnEwZTVieG91In0.DkCY-91coDahKvpH7Z26dw';
+  var bounds = [
+    [-128.49609375, 22.024545601240337], // Southwest coordinates
+    [-84.375, 43.89789239125797] // Northeast coordinates
+  ];
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/samf/ck4bxhty407oi1cp500abeca6',
+        center: [-117.044433, 32.685216],
+        zoom: 5.21,
+        minZoom: 4,
+        hash: true,
+        pitch: 20,
+        keyboard: false,
+        maxBounds: bounds
+    });
+
+  // Create a popup for use later
+  var popup = new mapboxgl.Popup({
+    closeButton: true,
+    closeOnClick: true
+  });
+
+  // Make border sectors clickable
+  map.on('click', 'us-border-sectors-fill', function(e){
+    map.getCanvas().style.cursor = 'pointer';
+    var coordinates = e.lngLat.wrap();
+    var sectorName = e.features[0].properties["SEC_NAME"];
+
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+
+    popup
+      .setLngLat(coordinates)
+      .setHTML("Border Sector: " + sectorName)
+      .addTo(map);
+    });
+
+  // Make death points clickable
+  map.on('click', 'deaths', function(e) {
+    var coordinates = e.features[0].geometry.coordinates.slice();
+    var dataProperties = e.features[0].properties
+    var causeOfDeath = dataProperties["Cause of Death"];
+    var reportedDate = dataProperties["Reported Date"];
+    var informationSource = dataProperties["Information Source"];
+    var urls = dataProperties["URL"];
+
+    // Ensure that if the map is zoomed out such that multiple
+    // copies of the feature are visible, the popup appears
+    // over the copy being pointed to.
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+
+    popup
+      .setLngLat(coordinates)
+      .setHTML("Cause of Death: " + causeOfDeath + "<br>"
+      + "Reported Date: " + reportedDate + "<br>"
+      + "Information Source: " + informationSource + "<br>"
+      + "Source URL(s): " + `<a href=${urls} target='blank'>${urls}</a>`)
+      .addTo(map);
+    });
+ 
+// Change the cursor to a pointer when the mouse is over the places layer.
+  map.on('mouseenter', 'places', function() {
+    map.getCanvas().style.cursor = 'pointer';
+  });
+ 
+// Change it back to a pointer when it leaves.
+  map.on('mouseleave', 'places', function() {
+    map.getCanvas().style.cursor = '';
+  });
+
+  // story setup
+
+  // get story json
+
+  // story navigation setup via keys
+  document.onkeydown = checkKey;
+
+  function checkKey(e) {
+    e = e || window.event;
+
+    if (e.keyCode == '37') {
+      console.log("previous");
+      previousStory();
+    }
+    else if (e.keyCode == '39') {
+      nextStory();
+    }
+  }
+
+  var i = 1;
+  // TO DO: in here, show a minimap or small map once the flyto is complete
+  function nextStory(){
+    flyToStory(i);
+    injectStory(i);
+    i++;
+  };
+
+  function previousStory(){
+    if (i > 0){
+      i--;
+    } else {
+      return
+    }
+    flyToStory(i);
+    injectStory(i);
+   
+    console.log("previous story is is now ", i);
+  };
+
+  function flyToStory(i){
+    console.log("fly to i is now ", i);
+    switch (i) {
+      case 1:
+        map.flyTo({
+          center: [
+          -117.044433, 32.685216
+          ],
+          zoom: 16,
+          speed: 0.3
+        });
+        break;
+      case 2:
+        map.flyTo({
+          center: [
+          -115.449848, 32.679881
+          ],
+          zoom: 16,
+          speed: 0.5
+        });
+        break;
+      case 3:
+        map.flyTo({
+          center: [
+          -114.75745448, 32.72700319
+          ],
+          zoom: 16,
+          speed: 0.5
+        });
+        break;
+      case 4:
+      map.flyTo({
+        center: [
+        -110.9463053, 32.2427637
+        ],
+        zoom: 16,
+        speed: 0.5
+        });
+      break;
+      case 5:
+      map.flyTo({
+        center: [
+        -106.798756, 31.812809
+        ],
+        zoom: 16,
+        speed: 0.5
+      });
+      break;
+      case 6:
+      map.flyTo({
+        center: [
+        -100.632885, 28.908791
+        ],
+        zoom: 16,
+        speed: 0.5
+      });
+      break;
+      case 7:
+      map.flyTo({
+        center: [
+        -98.5077704, 29.2078453
+        ],
+        zoom: 16,
+        speed: 0.5
+      });
+      break;
+      case 8:
+      map.flyTo({
+        center: [
+        -97.5000849, 25.898448
+        ],
+        zoom: 16,
+        speed: 0.5
+      });
+      break;
+    }
+  };
+
+  function injectStory(i){
+    console.log("injecting story number: ", i);
+    if (i <= 8) {
+      document.getElementById("story").innerHTML =
+      `<ul><b>${stories[i].title}</b><br>` + 
+      `<i>Source: <a href='${stories[i].sourceURL}'>${stories[i].sourceName}</a></i><br>` +
+      `<br>${stories[i].story}</ul>`
+    }
+    else {
+      return
+    }
+  }
+</script>
+
+</body>
+</html>
