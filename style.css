@@ -41,8 +41,9 @@ body { margin: 0; padding: 0; }
     }
     #main-menu {
       font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-      right: 15%;
-      top: 10%;
+      left: 1%;
+      top: 0.5%;
+      position: absolute;
       background: rgba(255,255,255,.85);
     }
     h4 {
