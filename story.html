@@ -1,237 +1,277 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8" />
-<title>US / Mexico Border Deaths, 2019</title>
-<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-<script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.js"></script>
-<link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.1/mapbox-gl.css" rel="stylesheet" />
-<script src="stories.js"></script>
-<link rel="stylesheet" type="text/css" href="style.css">
-</head>
+    <meta charset='utf-8' />
+    <title>Story Mode: US / Mexico Border Deaths, 2019</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+    <script src="https://unpkg.com/scrollama"></script>
+    <style>
+        body {
+            margin:0; 
+            padding:0; 
+            font-family: sans-serif;
+        }
+        a, a:hover, a:visited {
+            color: #0071bc;
+        }
+        #map {
+            top:0; 
+            height: 100vh;
+            width:100vw;
+            position: fixed;
+            z-index: -5;
+        }
+        #header {
+            margin: 3vh auto;
+            width: 50vw;
+            padding: 2vh;
+            text-align: center;
+        }
+        #footer {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+        }
+        #features {
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+            z-index: 100;
+        }
+        .centered {
+            width: 50vw;
+            margin: 0 auto;
+        }
+        .lefty {
+            width: 33vw;
+            margin-left: 5vw;
+        }
+        .righty {
+            width: 33vw;
+            margin-left: 62vw;
+        }
+        .light {
+            color: #444;
+            background-color: #fafafa;
+        }
+        .dark {
+            color: #fafafa;
+            background-color: #444;
+        }
+        .step {
+            padding-bottom: 50vh;
+            /* margin-bottom: 10vh; */
+            opacity: 0.25;
+        }
+        .step.active {
+            opacity: 0.9;
+        }
 
+        .step div {
+            padding:  25px 50px;
+            line-height: 25px;
+            font-size: 13px;
+        }
+
+        .step img {
+            width: 100%;
+        }
+
+        @media (max-width: 750px) {
+            #features {
+                width: 90vw;
+                margin: 0 auto;
+            }
+        }
+        </style>
+</head>
 <body>
 
 <div id="map"></div>
-<div id ='main-menu'>
-  <ul>
-    <a href="/usmx-migrant-death-2019">Main map</a>
-  </ul>
-</div>
-<div id='story-legend'>
-    <ul>
-      <p>
-        Use the <b>arrow keys</b> on your keyboard to read about specific stories, and continue to interact with the map as desired.
-      </p>
-      </div>
-    </ul>
-</div>
-<div id='story'><p><b>Content Warning:</b> Many of these stories contain violent descriptions.</p>
-
+<div id="story"></div>
+<script src="./config.js"></script>
 <script>
-	mapboxgl.accessToken = 'pk.eyJ1Ijoic2FtZiIsImEiOiJjaWZ3bGhtdjgzMnN1dWdrcnEwZTVieG91In0.DkCY-91coDahKvpH7Z26dw';
-  var bounds = [
-    [-128.49609375, 22.024545601240337], // Southwest coordinates
-    [-84.375, 43.89789239125797] // Northeast coordinates
-  ];
-    var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/samf/ck4bxhty407oi1cp500abeca6',
-        center: [-117.044433, 32.685216],
-        zoom: 5.21,
-        minZoom: 4,
-        hash: true,
-        pitch: 20,
-        keyboard: false,
-        maxBounds: bounds
+var layerTypes = {
+    'fill': ['fill-opacity'],
+    'line': ['line-opacity'],
+    'circle': ['circle-opacity', 'circle-stroke-opacity'],
+    'symbol': ['icon-opacity', 'text-opacity'],
+    'raster': ['raster-opacity'],
+    'fill-extrusion': ['fill-extrusion-opacity']
+}
+
+var alignments = {
+    'left': 'lefty',
+    'center': 'centered',
+    'right': 'righty'
+}
+
+function getLayerPaintType(layer) {
+    var layerType = map.getLayer(layer).type;
+    return layerTypes[layerType];
+}
+
+function setLayerOpacity(layer) {
+    var paintProps = getLayerPaintType(layer.layer);
+    paintProps.forEach(function(prop) {
+        map.setPaintProperty(layer.layer, prop, layer.opacity);
     });
+}
 
-  // Create a popup for use later
-  var popup = new mapboxgl.Popup({
-    closeButton: true,
-    closeOnClick: true
-  });
+var story = document.getElementById('story');
+var features = document.createElement('div');
+features.classList.add(alignments[config.alignment]);
+features.setAttribute('id', 'features');
 
-  // Make border sectors clickable
-  map.on('click', 'us-border-sectors-fill', function(e){
-    map.getCanvas().style.cursor = 'pointer';
-    var coordinates = e.lngLat.wrap();
-    var sectorName = e.features[0].properties["SEC_NAME"];
+var header = document.createElement('div');
 
-    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+if (config.title) {
+    var titleText = document.createElement('h1');
+    titleText.innerText = config.title;
+    header.appendChild(titleText);
+}
+
+if (config.subtitle) {
+    var subtitleText = document.createElement('h2');
+    subtitleText.innerText = config.subtitle;
+    header.appendChild(subtitleText);
+}
+
+if (config.byline) {
+    var bylineText = document.createElement('p');
+    bylineText.innerText = config.byline;
+    header.appendChild(bylineText);
+}
+
+if (header.innerText.length > 0) {
+    header.classList.add(config.theme);
+    header.setAttribute('id', 'header');
+    story.appendChild(header);
+}
+
+config.chapters.forEach((record, idx) => {
+    var container = document.createElement('div');
+    var chapter = document.createElement('div');
+    
+    if (record.title) {
+        var title = document.createElement('h3');
+        title.innerText = record.title;
+        chapter.appendChild(title);
+    }
+    
+    if (record.image) {
+        var image = new Image();  
+        image.src = record.image;  
+        chapter.appendChild(image);
+    }
+    
+    if (record.description) {
+        var story = document.createElement('p');
+        story.innerHTML = record.description;
+        chapter.appendChild(story);
     }
 
-    popup
-      .setLngLat(coordinates)
-      .setHTML("Border Sector: " + sectorName)
-      .addTo(map);
+    container.setAttribute('id', record.id);
+    container.classList.add('step');
+    if (idx === 0) {
+        container.classList.add('active');
+    }
+
+    chapter.classList.add(config.theme);
+    container.appendChild(chapter);
+    features.appendChild(container);
+});
+
+story.appendChild(features);
+
+var footer = document.createElement('div');
+
+if (config.footer) {
+    var footerText = document.createElement('p');
+    footerText.innerHTML = config.footer;
+    footer.appendChild(footerText);
+}
+
+if (footer.innerText.length > 0) {
+    footer.classList.add(config.theme);
+    footer.setAttribute('id', 'footer');
+    story.appendChild(footer);
+}
+
+mapboxgl.accessToken = config.accessToken;
+
+const transformRequest = (url) => {
+    const hasQuery = url.indexOf("?") !== -1;	  
+    const suffix = hasQuery ? "&pluginName=journalismScrollytelling" : "?pluginName=journalismScrollytelling";	  
+    return {
+      url: url + suffix
+    }	  
+}
+
+var bounds = [
+  [-128.49609375, 22.024545601240337], // Southwest coordinates
+  [-84.375, 43.89789239125797] // Northeast coordinates
+];
+
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: config.style,
+    center: config.chapters[0].location.center,
+    zoom: config.chapters[0].location.zoom,
+    bearing: config.chapters[0].location.bearing,
+    pitch: config.chapters[0].location.pitch,
+    bounds: bounds,
+    minZoom: 4,
+    hash: true,
+    scrollZoom: false,
+    transformRequest: transformRequest
+});
+
+var marker = new mapboxgl.Marker();
+if (config.showMarkers) {
+    marker.setLngLat(config.chapters[0].location.center).addTo(map);
+}
+
+// instantiate the scrollama
+var scroller = scrollama();
+
+map.on("load", function() {
+    // setup the instance, pass callback functions
+    scroller
+    .setup({
+        step: '.step',
+        offset: 0.5,
+        progress: true
+    })
+    .onStepEnter(response => {
+        var chapter = config.chapters.find(chap => chap.id === response.element.id);
+        response.element.classList.add('active');
+        map.flyTo(chapter.location);
+        if (config.showMarkers) {
+            marker.setLngLat(chapter.location.center);
+        }
+        if (chapter.onChapterEnter.length > 0) {
+            chapter.onChapterEnter.forEach(setLayerOpacity);
+        }
+    })
+    .onStepExit(response => {
+        var chapter = config.chapters.find(chap => chap.id === response.element.id);
+        response.element.classList.remove('active');
+        if (chapter.onChapterExit.length > 0) {
+            chapter.onChapterExit.forEach(setLayerOpacity);
+        }
     });
+});
 
-  // Make death points clickable
-  map.on('click', 'deaths', function(e) {
-    var coordinates = e.features[0].geometry.coordinates.slice();
-    var dataProperties = e.features[0].properties
-    var causeOfDeath = dataProperties["Cause of Death"];
-    var reportedDate = dataProperties["Reported Date"];
-    var informationSource = dataProperties["Information Source"];
-    var urls = dataProperties["URL"];
+// setup resize event
+window.addEventListener('resize', scroller.resize);
 
-    // Ensure that if the map is zoomed out such that multiple
-    // copies of the feature are visible, the popup appears
-    // over the copy being pointed to.
-    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-    }
-
-    popup
-      .setLngLat(coordinates)
-      .setHTML("Cause of Death: " + causeOfDeath + "<br>"
-      + "Reported Date: " + reportedDate + "<br>"
-      + "Information Source: " + informationSource + "<br>"
-      + "Source URL(s): " + `<a href=${urls} target='blank'>${urls}</a>`)
-      .addTo(map);
-    });
- 
-// Change the cursor to a pointer when the mouse is over the places layer.
-  map.on('mouseenter', 'places', function() {
-    map.getCanvas().style.cursor = 'pointer';
-  });
- 
-// Change it back to a pointer when it leaves.
-  map.on('mouseleave', 'places', function() {
-    map.getCanvas().style.cursor = '';
-  });
-
-  // story setup
-
-  // get story json
-
-  // story navigation setup via keys
-  document.onkeydown = checkKey;
-
-  function checkKey(e) {
-    e = e || window.event;
-
-    if (e.keyCode == '37') {
-      console.log("previous");
-      previousStory();
-    }
-    else if (e.keyCode == '39') {
-      nextStory();
-    }
-  }
-
-  var i = 1;
-  // TO DO: in here, show a minimap or small map once the flyto is complete
-  function nextStory(){
-    flyToStory(i);
-    injectStory(i);
-    i++;
-  };
-
-  function previousStory(){
-    if (i > 0){
-      i--;
-    } else {
-      return
-    }
-    flyToStory(i);
-    injectStory(i);
-   
-    console.log("previous story is is now ", i);
-  };
-
-  function flyToStory(i){
-    console.log("fly to i is now ", i);
-    switch (i) {
-      case 1:
-        map.flyTo({
-          center: [
-          -117.044433, 32.685216
-          ],
-          zoom: 16,
-          speed: 0.3
-        });
-        break;
-      case 2:
-        map.flyTo({
-          center: [
-          -115.449848, 32.679881
-          ],
-          zoom: 16,
-          speed: 0.5
-        });
-        break;
-      case 3:
-        map.flyTo({
-          center: [
-          -114.75745448, 32.72700319
-          ],
-          zoom: 16,
-          speed: 0.5
-        });
-        break;
-      case 4:
-      map.flyTo({
-        center: [
-        -110.9463053, 32.2427637
-        ],
-        zoom: 16,
-        speed: 0.5
-        });
-      break;
-      case 5:
-      map.flyTo({
-        center: [
-        -106.798756, 31.812809
-        ],
-        zoom: 16,
-        speed: 0.5
-      });
-      break;
-      case 6:
-      map.flyTo({
-        center: [
-        -100.632885, 28.908791
-        ],
-        zoom: 16,
-        speed: 0.5
-      });
-      break;
-      case 7:
-      map.flyTo({
-        center: [
-        -98.5077704, 29.2078453
-        ],
-        zoom: 16,
-        speed: 0.5
-      });
-      break;
-      case 8:
-      map.flyTo({
-        center: [
-        -97.5000849, 25.898448
-        ],
-        zoom: 16,
-        speed: 0.5
-      });
-      break;
-    }
-  };
-
-  function injectStory(i){
-    console.log("injecting story number: ", i);
-    if (i <= 8) {
-      document.getElementById("story").innerHTML =
-      `<ul><b>${stories[i].title}</b><br>` + 
-      `<i>Source: <a href='${stories[i].sourceURL}'>${stories[i].sourceName}</a></i><br>` +
-      `<br>${stories[i].story}</ul>`
-    }
-    else {
-      return
-    }
-  }
 </script>
 
 </body>
