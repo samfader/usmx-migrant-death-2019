@@ -134,13 +134,13 @@ var config = {
   id: 'start-or-main',
   title: 'Back to the start/main map',
   image: '',
-  description: '<a href="/story.html">Click here to go back to the start</a>. <a href=".',
+  description: '<a href="/story.html">Click here to go back to the start</a>. <br><br><a href="/index.html">Click here to go back to the main map.</a>',
   location: {
-      center: [-97.5000849, 25.898448],
-      zoom: 16,
-      pitch: 60,
+      center: [-117.044433, 32.685216],
+      zoom: 6,
+      pitch: 0,
       bearing: 0,
-      speed: 0.4
+      speed: 0.8
   },
   onChapterEnter: [],
   onChapterExit: []
