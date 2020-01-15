@@ -132,9 +132,9 @@ var config = {
 },
 {
   id: 'start-or-main',
-  title: 'Back to the start/main map',
+  title: '',
   image: '',
-  description: '<a href="/story.html">Click here to go back to the start</a>. <br><br><a href="/index.html">Click here to go back to the main map.</a>',
+  description: '<a href="/usmx-migrant-death-2019/story.html">Click here to go back to the start</a>. <br><br><a href="/usmx-migrant-death-2019/index.html">Click here to go back to the main map.</a>',
   location: {
       center: [-117.044433, 32.685216],
       zoom: 6,

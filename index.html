@@ -12,25 +12,49 @@
 <body>
 <nav id="menu"></nav>
 <div id="map"></div>
-<div id='legend'>
-  <h4>Border Deaths, 2019</h4>
-    <ul>Whatever you may think of immigration into the United States, we should all be able to agree that our fellow humans
-      should not be dying while they try to move to the United States, no matter their reason. 
-      <p>
-        This map tells a story of those who died in 2019 trying to cross the militarized border into the United States.
-      </p>
-      <p>
-        Zoom in and click on points to read more details on the stories of those who lost their lives trying to better them.
-      </p>
-      <p>
-        <a href="/usmx-migrant-death-2019/story.html">Click here to view story mode.</a>
-      </p>
-      <p>
-        Feedback? <a href="mailto:sfader4@gmail.com" target="blank">Email me.</a>
-      </p>
+<div id="content-desktop">
+  <div id='legend'>
+    <h4>Border Deaths, 2019</h4>
+      <ul>Whatever you may think of immigration into the United States, we should all be able to agree that our fellow humans
+        should not be dying while they try to move to the United States, no matter their reason. 
+        <p>
+          This map tells a story of those who died in 2019 trying to cross the militarized border into the United States.
+        </p>
+        <p>
+          Zoom in and click on points to read more details on the stories of those who lost their lives trying to better them.
+        </p>
+        <p>
+          <a href="/usmx-migrant-death-2019/story.html">Click here to view story mode.</a>
+        </p>
+        <p>
+          Feedback? <a href="mailto:sfader4@gmail.com" target="blank">Email me.</a>
+        </p>
+      </ul>
+  </div>
+</div>
+
+<div id="content-mobile">
+  <div id='legend-mobile'>
+    <h4>Border Deaths, 2019</h4>
+    <ul>
+      <a href="/usmx-migrant-death-2019/story.html">Click here to view story mode.</a>
     </ul>
   </div>
+</div>
 <script>
+// console.log("test");
+
+// function isMobileDevice() {
+//     return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+// };
+
+// if (isMobileDevice == true){
+//   console.log("mobile");
+// }else {
+//     console.log("not");
+    
+// }
+
 	mapboxgl.accessToken = 'pk.eyJ1Ijoic2FtZiIsImEiOiJjaWZ3bGhtdjgzMnN1dWdrcnEwZTVieG91In0.DkCY-91coDahKvpH7Z26dw';
   var bounds = [
     [-128.49609375, 22.024545601240337], // Southwest coordinates

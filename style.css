@@ -1,4 +1,26 @@
+/* mobile stuff */
+#content-desktop {display: block;}
+#content-mobile {display: none;}
 
+@media screen and (max-width: 768px) {
+
+#content-desktop {display: none;}
+#content-mobile {display: block;}
+
+}
+
+#legend-mobile {
+  font: 14px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  background: rgba(255,255,255,.5);
+  width: 40%; 
+  border: 1px solid rgba(0,0,0,0.05);
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  box-shadow: 0 0 4px 0 rgba(0,0,0,0.1);
+  color: rgba(0,0,0,0.5);
+}
+}
 /* main page style */
 
 body { margin: 0; padding: 0; }
