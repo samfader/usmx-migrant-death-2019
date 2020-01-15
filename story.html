@@ -24,6 +24,15 @@
             position: fixed;
             z-index: -5;
         }
+        #main{
+          width: 7vh;
+          position: fixed;
+          padding: 1vh;
+          margin-left: 0.5vh;
+          text-align: center;
+          color: #444;
+          background-color: #fafafa;
+        }
         #header {
             margin: 3vh auto;
             width: 50vw;
@@ -94,7 +103,11 @@
 <body>
 
 <div id="map"></div>
+<div id="main">
+  <p><a href="/usmx-migrant-death-2019/index.html">Main map</a></p>
+</div>
 <div id="story"></div>
+
 <script src="./config.js"></script>
 <script>
 var layerTypes = {
