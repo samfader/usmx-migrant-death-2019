@@ -7,7 +7,7 @@ var config = {
     title: 'Migrant deaths on the US-Mexico border, 2019',
     subtitle: 'Content warning: Many of these stories contain violent descriptions.',
     byline: 'Scroll down to read more stories.',
-    footer: 'Source: source citations, etc.',
+    footer: 'Much of the data comes from the <a href="https://missingmigrants.iom.int/region/americas?region=1422" target="blank">Missing Migrants project</a>. Additional thanks to everyone who took a look and offered feedback.',
     chapters: [
         {  
             id: 'sandiego-smuggling-car',
